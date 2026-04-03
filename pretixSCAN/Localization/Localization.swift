@@ -48,6 +48,8 @@ struct Localization {
         static let ManualSetupMessage = NSLocalizedString("Instead of scanning a QR code, you can read these details off your screen.", comment: "")
         static let URL = NSLocalizedString("System URL", comment: "")
         static let Token = NSLocalizedString("Token", comment: "")
+        static let SetupLinkInvalid = NSLocalizedString("The setup link is invalid.", comment: "")
+        static let SetupLinkAlreadyConfigured = NSLocalizedString("This device is already configured. Reset it in Settings before opening a setup link.", comment: "")
 
         static let Connect = NSLocalizedString("Connect", comment: "")
         static let Cancel = NSLocalizedString("Cancel", comment: "")

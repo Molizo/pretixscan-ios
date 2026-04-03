@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var configStore: ConfigStore?
     var notificationManager: NotificationManager?
+    var pendingSetupLink: SetupDeepLink?
 
     var window: UIWindow?
 

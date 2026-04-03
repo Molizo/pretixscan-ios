@@ -19,6 +19,22 @@ class ConnectDeviceViewController: UIViewController, Configurable, SetupScannerV
         title = Localization.ConnectDeviceViewController.Title
         explanationLabel.text = Localization.ConnectDeviceViewController.Explanation
         manualSetupButton.title = Localization.ConnectDeviceViewController.ManualSetup
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handlePendingSetupLink),
+            name: .setupDeepLinkReceived,
+            object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .setupDeepLinkReceived, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        consumePendingSetupLinkIfNeeded()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -73,14 +89,29 @@ class ConnectDeviceViewController: UIViewController, Configurable, SetupScannerV
 
         configStore.apiBaseURL = url
         configStore.ticketValidator?.initialize(deviceInitializatioRequest) { error in
-            self.presentErrorAlert(ifError: error)
-
-            // API Client is correctly initialized
             DispatchQueue.main.async {
                 self.hideLoadingIndicator()
+                guard error == nil else {
+                    self.presentErrorAlert(ifError: error)
+                    return
+                }
+
                 (self.navigationController as? ConfiguredNavigationController)?.configStore = self.configStore
                 self.performSegue(withIdentifier: Segue.presentSelectEventTableViewController, sender: self)
             }
         }
+    }
+
+    @objc private func handlePendingSetupLink() {
+        consumePendingSetupLinkIfNeeded()
+    }
+
+    private func consumePendingSetupLinkIfNeeded() {
+        guard view.window != nil else { return }
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        guard let setupLink = appDelegate.pendingSetupLink else { return }
+
+        appDelegate.pendingSetupLink = nil
+        initialize(token: setupLink.token, url: setupLink.url)
     }
 }
